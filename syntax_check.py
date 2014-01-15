@@ -103,7 +103,8 @@ class Tree:
     def PrintNode(self):
         return 'Tree(str=%s indent=%d rightindent = %d space="%s")' % \
             (repr(self.string), self.indent, self.right, repr(self.space))
-
+        return 'Tree(str=%s indent= %d right= %d)' % \
+            (repr(self.string), self.indent, self.right)
     def PrintTree(self, level):
         indent = ''
         for i in range(level):
@@ -154,41 +155,62 @@ def check_syntax(tree, cur_indent = 0):
             return False
         return True
     else:
+        """
         cur_indent = tree.indent
-        i = 0
         min_indent = tree.children[0].indent
         min_right = tree.right
+        
         for child in tree.children:
             correct = check_syntax(child, cur_indent)
             if min_indent > child.indent:
                 #print Tree.PrintNode(child)
                 return False
             if min_right < child.indent and min_right > -1:
-                #print min_right, 'min_right'
-                #print child.indent, 'child.indent'
+                print min_right, 'min_right'
+                print child.indent, 'child.indent'
                 #print Tree.PrintNode(child)
                 return False
             if not correct:
                 #print Tree.PrintNode(child)
                 return False
+        """
+        i = 0
+        indent = tree.indent
+        right = tree.right
+        if indent == right:
+            return False
+        while i < len(tree.children):
+            correct = check_syntax(tree.children[i], indent)
+            if i > 0:
+                prev_indent = tree.children[i-1].indent
+                cur_indent = tree.children[i].indent
+                if prev_indent > cur_indent:
+                    return False
+            if not correct:
+                return False
+            i += 1
         return True
 
 test = "(A B)"
 test1 = "(A (B C\n D)\n)"
 test2 = "(A (B C\n    D)\n)"
 test3 = "(A (B C\n D)\n )"
-test4 = "(A (B\n     ))"
+test4 = "(A (B)\n )"
 test5 = "(A (B C D)\n )"
-test6 = "(A (B\n))"
-test7 = "(A\n    )"
-tests = [test, test1, test2, test3, test4, test5, test6, test7]
-#tests= [test6, test7]
+test6 = "(A \n B\n C)"
+test7 = "(A (B C D) (E F G) \n )"
+test8 = "(A (B \n\tC D)\n\n    (E F)\n  )"
+tests = [test, test1, test2, test3, test4, test5, test6, test7, test8]
+#tests= [test4, test5]
 
 for test in tests:
     print
     print test
     tree = read_list(tokenizer(test))
+    print tree
     print check_syntax(tree)
+
+#for token in tokenizer(test7): print token,
 
 """            
 f = open('wimpy-delete.el','r')
@@ -205,3 +227,4 @@ for line in f:
 #print check_syntax(c)
 
 """
+# indent of children shouldn't be lower than indent of any earlier children
